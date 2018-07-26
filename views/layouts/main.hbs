@@ -1,0 +1,35 @@
+<!doctype html>
+    <html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+        <meta name="description" content="Demo project">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+        <title>{{pageTitle}}</title>
+        {{!-- Custom.css with Bulma css --}}
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.1/css/bulma.css" integrity="sha256-zKA1Bf41O96+gJSlkn/Bh2HATW/OhwkApPlYTp3B5O8=" crossorigin="anonymous" />
+        {{!-- Font-Awesome --}}
+        <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.1.1/css/all.css" integrity="sha384-O8whS3fhG2OnA5Kas0Y9l3cfpmYjapjI0E4theH4iuMD+pLhbf6JI0jIMfYcK3yZ" crossorigin="anonymous">
+        <link rel="stylesheet" type="text/css" href={{static 'css/main.css'}} />
+        {{!-- peer page settings placed just before closing head tag --}}
+        {{{_section.head}}}
+    </head>
+    <body>
+
+        {{!-- main app container, where pages will be rendered --}}
+        <section class="section app">
+            <div class="container">
+                {{{body}}}
+            </div>
+        </section>
+
+
+        {{!-- jQuery --}}
+        <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+        {{!-- Socket.io --}}
+        <script src="/socket.io/socket.io.js"></script>
+        {{!-- peer page scripts  --}}
+        <script src={{static 'js/Chat.js'}}></script>
+        {{{_section.jquery}}}
+    </body>
+    </html>

@@ -1,0 +1,46 @@
+.app {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.hero .hero-body {
+    padding-top: 10px;
+}
+
+.box {
+    padding: 0.25rem;
+}
+
+.chat .chat-body {
+    height: 400px;
+    max-height: 400px;
+    padding: 10px 20px 0;
+    overflow-y: scroll;
+}
+
+.chat .chat-controls {
+    margin-top: 10px;
+}
+
+.chat .chat-controls .typing-ctrl {
+    display: inline-block;
+    margin-bottom: 0.25rem;
+    margin-left: 1.25rem;
+    padding: 0 1.25rem;
+}
+
+.chat-body .list-item {
+    position: relative;
+    padding: 0.5rem;
+}
+
+.chat-body .list-item > button {
+    position: absolute;
+    right: 4px;
+    top: 4px;
+}
+
+.chat-body .msg {
+    padding: 2px 4px;
+    margin-bottom: 4px;
+}

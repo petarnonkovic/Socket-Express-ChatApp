@@ -1,0 +1,211 @@
+{{#section 'head'}}
+    <meta name="robots" content="noindex">
+{{/section}}
+
+{{!-- Header --}}
+<section class="hero">
+    <div class="hero-body">
+        <div class="container">
+            <h1 class="title is-3 has-text-centered has-text-success">Chat App | Socket.io</h1>
+            <h3 class="subtitle is-5 has-text-right has-text-info">Nickname: <span id="userName"></span></h3>
+        </div>
+    </div>
+</section>
+{{!-- /.hero --}}
+
+{{!-- notification on errors --}}
+<div id="notifyContainer" class="block"></div>
+
+{{!-- Change Username Controls --}}
+<div class="columns is-tablet">
+    <div class="column is-half is-offset-one-quarter">
+        <div class="field is-horizontal is-grouped">
+            <div class="control is-expanded">
+                <input type="text" id="changeInput" class="input is-success" placeholder="Change your'e username">
+            </div>
+            <div class="control">
+                <button id="changeBtn" class="button is-success is-outlined">Change</button>
+            </div>
+        </div>
+    </div>
+</div>
+{{!-- /.columns  --}}
+
+{{!-- Chat --}}
+<div class="container">
+    <div class="columns">
+        <div class="column is-half is-offset-one-quarter">
+
+            <div class="chat">
+                {{!-- chat-body  --}}
+                <div class="chat-body" id="messages">
+                </div>
+                {{!--  /.chat-body --}}
+                {{!-- chat controls --}}
+                <div class="chat-controls">
+                    <div id="typeCtrl" class="box typing-ctrl has-text-grey has-text-weight-light is-hidden">@username typing...</div>
+                    <div class="field is-horizontal is-grouped">
+                        <div class="control is-expanded">
+                            <input type="text" id="msgInput" class="input is-info" placeholder="Type a message">
+                        </div>
+                        <div class="control">
+                            <button id="msgBtn" class="button is-info is-outlined" disabled="disabled">
+                                <span class="icon is-medium"><i class="far fa-caret-square-right"></i></span>
+                                <span> Send</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                {{!-- /.chat-controls --}}
+            </div>
+            {{!-- /.chat --}}
+        </div>
+    </div>
+</div>
+<!-- /.container -->
+
+
+{{#section 'jquery'}}
+
+<script>
+    // selectors
+    const $change_input = $("#changeInput");
+    const $change_button = $("#changeBtn");
+    const $msg_input = $("#msgInput");
+    const $msg_button = $("#msgBtn");
+    const $typeCtrl = $('#typeCtrl');
+    const $userName = $("#userName");
+    // set username on load
+    let username = "Guest";
+    $userName.text(username);
+
+    // connect to server socket
+    const socket = io();
+    // const socket = io.connect('http://localhost:4100');
+
+    // listen for connect event and log
+    socket.on('connect', () => {
+        console.log('Connected to server');
+
+        // focus change name input on connect
+        $change_input.focus();
+
+        // listen for change username event
+        $change_button.on('click', function(e) {
+            // capture new name value
+            let newName = $change_input.val();
+
+            // check is new-name invalid
+            if (newName.length < 2) {
+                showError("Username must be more then 2 characters in length");
+                return false;
+            }
+            // all.ok
+            username = newName;
+            $userName.text(newName);
+            let name_string = JSON.stringify({ username });
+            // emit new name to server
+            socket.emit('change_username', name_string);
+
+            // clear input and pass focus to msg input
+            $change_input.val('');
+            $msg_input.focus();
+        })
+
+        // listen for change name enter keypress
+        $change_input.keypress(function(e) {
+            if (e.which == 13) {
+                $change_button.click()
+            }
+        });
+
+        // if enabled listen for new message enter keypress
+        $msg_input.keypress(function(e) {
+
+            // enable send button if input not empty
+            if ($(this).val().length > 0) {
+                $msg_button.prop('disabled', false);
+                // send on enter
+                if (e.which == 13) {
+                    $msg_button.click();
+                }
+            }
+
+            // disable input again if text is removed
+            if ($(this).val().length < 1) {
+                $msg_button.prop('disabled', true);
+            }
+        });
+
+        // listen for new message to send
+        $msg_button.on('click',function(e) {
+            // new data
+            let data = {
+                username: username,
+                message: $msg_input.val(),
+                created: getTime()
+            };
+
+            // show msg to sender Immediately
+            showMessage(data);
+
+            // stringify data
+            let data_string = JSON.stringify(data);
+            // emit msg to server
+            socket.emit('get_message', data_string);
+
+            // clear input
+            $msg_input.val('');
+        });
+
+        // listen for new messages from other chat users
+        socket.on('new_message', function(data) {
+            let dataObj = JSON.parse(data);
+            showMessage(dataObj);
+        });
+
+        // throttle sending typing event for 250ms
+        $msg_input.keydown(throttle(function(e) {
+                let data = {
+                    username: username,
+                    message: " is typing..."
+                };
+                if (e.which !== 13) {
+                    // stringify and send data
+                    let data_string = JSON.stringify(data);
+                    socket.emit('user_typing', data_string);
+                }
+            }));
+
+        // show user typing message
+        socket.on('user_typing', function(data) {
+            // if set clear timer
+            clearTimeout(timer);
+            // parse data and show typing box to users
+            let server_data = JSON.parse(data);
+            let typing_string = `${server_data.username} ${server_data.message}`;
+            $typeCtrl.text(typing_string);
+            $typeCtrl.removeClass('is-hidden');
+            // set timer to remove typing box
+            var timer = setTimeout(() => {
+                $typeCtrl.text('');
+                $typeCtrl.addClass('is-hidden');
+            }, 1500);
+        });
+
+        // listen disconnect event and log
+        socket.on('disconnect', () => {
+            console.log('Disconnected from server');
+        });
+
+         // handle errors
+         socket.on('error', (err) => console.error(err));
+
+    });
+
+
+
+ </script>
+
+{{/section}}
+
